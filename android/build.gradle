@@ -1,0 +1,105 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "com.android.tools.build:gradle:8.0.0"
+    }
+}
+
+def isNewArchitectureEnabled() {
+    return rootProject.hasProperty("newArchEnabled") && rootProject.getProperty("newArchEnabled") == "true"
+}
+
+apply plugin: "com.android.library"
+apply plugin: "maven-publish"
+
+if (isNewArchitectureEnabled()) {
+    apply plugin: "com.facebook.react"
+}
+
+def supportsNamespace() {
+    def parsed = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')
+    def major = parsed[0].toInteger()
+    def minor = parsed[1].toInteger()
+
+    // Namespace support was added in AGP 7.3.0
+    return (major == 7 && minor >= 3) || major >= 8
+}
+
+android {
+    if (supportsNamespace()) {
+        namespace "com.biomini.adnan"
+
+        sourceSets {
+            main {
+                manifest.srcFile "src/main/AndroidManifestNew.xml"
+                // jniLibs.srcDirs = ['src/main/jniLibs']
+            }
+        }
+    }
+
+    compileSdkVersion 34
+
+    defaultConfig {
+        minSdkVersion 21 // Ensure this matches the minimum requirement
+        targetSdkVersion 34 // Latest target SDK
+        
+    }
+    sourceSets {
+        main {
+            // manifest.srcFile 'src/main/AndroidManifest.xml'
+            jniLibs.srcDirs = ['src/main/jniLibs']
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    lint {
+        disable "GradleCompatible"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+    google()
+    
+}
+
+
+dependencies {
+    implementation "com.facebook.react:react-native:+"
+    // implementation files('libs/libBioMini-v3.0.1.2.aar')
+    implementation fileTree(dir: 'libs', include: ['*.jar*'])
+    // implementation files('libs/jxl.jar')
+    // Required AndroidX libraries
+    // implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.viewpager2:viewpager2:1.0.0'   
+    // // implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    // // implementation 'com.google.android.material:material:1.2.0-alpha04'
+    // // implementation 'androidx.preference:preference:1.1.1'
+    // // implementation "androidx.drawerlayout:drawerlayout:1.0.0"
+    // // implementation 'androidx.core:core-ktx:1.5.0'
+
+    // // // Add your Kotlin stdlib (if you’re using Kotlin)
+    // // implementation "org.jetbrains.kotlin:kotlin-stdlib:1.5.0"
+
+    // // Your biometrics or USB handling library
+    // // implementation project(path: ':libBioMini')
+
+    // // Testing dependencies
+    // testImplementation 'junit:junit:4.12'
+    // androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    // androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
+}
